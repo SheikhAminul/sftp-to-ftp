@@ -1,0 +1,36 @@
+{
+	"name": "sftp-to-ftp",
+	"version": "1.0.0",
+	"description": "",
+	"main": "lib/index.js",
+	"types": "lib/index.d.ts",
+	"scripts": {
+		"build": "tsc",
+		"watch:build": "(set /p dirPath=\"Enter Dir Path:\" || set dirPath=./lib) && call tsc --watch --outDir \"%dirPath%\""
+	},
+	"bin": {
+		"sftp-to-ftp": "/lib/connect.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/SheikhAminul/sftp-to-ftp.git"
+	},
+	"keywords": [],
+	"author": "Sheikh Aminul <aminulfse@gmail.com>",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/SheikhAminul/sftp-to-ftp/issues"
+	},
+	"files": [
+		"./lib/**/*"
+	],
+	"homepage": "https://github.com/SheikhAminul/sftp-to-ftp#readme",
+	"devDependencies": {
+		"@types/ssh2": "^1.15.5",
+		"typescript": "^5.7.3"
+	},
+	"dependencies": {
+		"fs-tunnel": "1.0.0",
+		"ssh2": "^1.16.0"
+	}
+}
