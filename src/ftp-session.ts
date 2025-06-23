@@ -14,27 +14,24 @@ export class FTPSession {
 	private dataServer: net.Server | null
 	private renameFrom: string | null
 	private pasvMode: boolean
-	private authenticated: boolean
 	private transferType: string
-	private options: FTPSessionOptions
-	private username: string | null
+	private options: { loggedIn: boolean, username: string } = { loggedIn: false, username: '' }
 
 	constructor(
 		socket: net.Socket,
 		sshFS: SSHFileSystem,
 		options: FTPSessionOptions
 	) {
+		this.options.loggedIn = options?.authenticationNeeded ? false : true
+
 		this.socket = socket
 		this.sshFS = sshFS
-		this.options = options
 		this.cwd = '/'
 		this.dataSocket = null
 		this.dataServer = null
 		this.renameFrom = null
 		this.pasvMode = false
-		this.authenticated = !options.authenticationNeeded
 		this.transferType = 'A'
-		this.username = null
 
 		this.setupHandlers()
 		this.send(220, 'FTP-SSH Bridge Ready')
@@ -59,7 +56,7 @@ export class FTPSession {
 	private async handleCommand(cmd: string, args: string): Promise<void> {
 		console.log(`FTP Command: ${cmd} ${args}`)
 
-		if (!this.authenticated && !['USER', 'PASS', 'QUIT'].includes(cmd)) {
+		if (!this.options.loggedIn && !['USER', 'PASS', 'QUIT'].includes(cmd)) {
 			this.send(530, 'Please login with USER and PASS')
 			return
 		}
@@ -67,29 +64,28 @@ export class FTPSession {
 		try {
 			switch (cmd) {
 				case 'USER':
-					this.username = args
-					if (this.options.authenticationNeeded) {
-						this.send(331, 'Password required')
-					} else {
-						this.authenticated = true
-						this.send(230, 'Login successful (pre-authenticated)')
-					}
-					break
-				case 'PASS':
-					if (!this.options.authenticationNeeded) {
-						this.send(230, 'Already authenticated via configuration')
+					if (this.options.loggedIn) {
+						this.send(230, 'Already logged in')
 						return
 					}
-					if (!this.username) {
+					this.options.username = args
+					this.send(331, 'Password required')
+					break
+				case 'PASS':
+					if (this.options.loggedIn) {
+						this.send(230, 'Already logged in')
+						return
+					}
+					if (!this.options.username) {
 						this.send(503, 'Login with USER first')
 						return
 					}
 					try {
-						await this.sshFS.connectWithCredentials(this.username, args)
-						this.authenticated = true
+						await this.sshFS.connectWithCredentials(this.options.username, args)
+						this.options.loggedIn = true
 						this.send(230, 'Login successful')
-					} catch (err) {
-						console.error('SSH login failed:', err)
+					} catch {
+						this.options.username = ''
 						this.send(530, 'Login authentication failed')
 					}
 					break
