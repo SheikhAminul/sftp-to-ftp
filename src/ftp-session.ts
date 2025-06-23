@@ -54,7 +54,7 @@ export class FTPSession {
 	}
 
 	private async handleCommand(cmd: string, args: string): Promise<void> {
-		console.log(`FTP Command: ${cmd} ${args}`)
+		console.log(`FTP Command: ${cmd} ${cmd === 'PASS' ? '*****' : args}`)
 
 		if (!this.options.loggedIn && !['USER', 'PASS', 'QUIT'].includes(cmd)) {
 			this.send(530, 'Please login with USER and PASS')
