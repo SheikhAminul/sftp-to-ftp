@@ -11,10 +11,10 @@ import { SSHToFTPBridge } from '.'
 	npx sftp-to-ftp
 
 	You can also pass the necessary arguments directly in the command line. For example:
-	npx sftp-to-ftp --ssh-host 192.168.0.105 --ssh-port 22 --ssh-user root --ssh-pass PWD --ftp-port 21
+	npx sftp-to-ftp --ssh-host 192.168.0.105 --ssh-port 22 --ssh-user root --ssh-pass PWD --ftp-host 127.0.0.1 --ftp-port 21
 
 	If authentication is not needed, you can leave the SSH username and password empty:
-	npx sftp-to-ftp --ssh-host 192.168.0.105 --ssh-port 22 --ftp-port 21
+	npx sftp-to-ftp --ssh-host 192.168.0.105 --ssh-port 22 --ftp-host 127.0.0.1 --ftp-port 21
 */
 
 (async () => {
@@ -24,7 +24,7 @@ import { SSHToFTPBridge } from '.'
 
 	try {
 		if (!args['ssh-host']) {
-			args['ssh-host'] = await cli.question('Enter SSH host: ')
+			args['ssh-host'] = await cli.question('Enter SSH host/IP: ')
 			if (!args['ssh-host']) throw 'The SSH host is necessary to connect!'
 
 			if (!args['ssh-port']) args['ssh-port'] = await cli.question('Enter SSH port (Default: 22): ')
@@ -33,15 +33,18 @@ import { SSHToFTPBridge } from '.'
 
 			if (!args['ssh-pass']) args['ssh-pass'] = await cli.question('Enter SSH password (Leave empty if not needed): ')
 
+			if (!args['ftp-host']) args['ftp-host'] = await cli.question('Enter FTP host/IP (Default: 127.0.0.1): ')
+
 			if (!args['ftp-port']) args['ftp-port'] = await cli.question('Enter FTP port (Default: 21): ')
 		}
 
 		const connection = new SSHToFTPBridge({
 			host: args['ssh-host'],
 			port: args['ssh-port'] ? parseInt(args['ssh-port']) : 22,
-			username: args['ssh-user'] || undefined,
-			password: args['ssh-pass'] || undefined
+			username: args['ssh-user'] || void 0,
+			password: args['ssh-pass'] || void 0
 		}, {
+			host: args['ftp-host'] || '127.0.0.1',
 			port: args['ftp-port'] ? parseInt(args['ftp-port']) : 21
 		})
 

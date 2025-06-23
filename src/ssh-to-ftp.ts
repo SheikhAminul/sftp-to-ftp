@@ -8,7 +8,7 @@ export class SSHToFTPBridge {
 	public FTPSession!: FTPSession
 	public SSHFileSystem!: SSHFileSystem
 
-	constructor(configuration: SSHConfiguration, { port = 21 }: { port?: number } = { port: 21 }) {
+	constructor(configuration: SSHConfiguration, { host = '127.0.0.1', port = 21 }: { host?: string, port?: number } = { host: '127.0.0.1', port: 21 }) {
 		this.server = net.createServer()
 
 		this.server.on('connection', (socket: net.Socket) => {
@@ -18,8 +18,8 @@ export class SSHToFTPBridge {
 			})
 		})
 
-		this.server.listen(port, '0.0.0.0', () => {
-			console.log(`🟢 FTP server listening!\nftp://localhost:${port}`)
+		this.server.listen(port, host, () => {
+			console.log(`🟢 FTP server listening!\nftp://${host}:${port}`)
 		})
 	}
 

@@ -40,24 +40,25 @@ npm install -g sftp-to-ftp
    ```
    Example output:
    ```
-   Enter SSH host: myserver.com
-   Enter SSH port (Default: 22): 
-   Enter SSH username (Leave empty if not needed): admin
+   Enter SSH host/IP: 192.168.0.105
+   Enter SSH port (Default: 22): 22
+   Enter SSH username (Leave empty if not needed): root
    Enter SSH password (Leave empty if not needed): ********
-   Enter FTP port (Default: 21): 2121
-   🟢 FTP server listening! ftp://localhost:2121
+   Enter FTP host/IP (Default: 127.0.0.1): 127.0.0.1
+   Enter FTP port (Default: 21): 21
+   🟢 FTP server listening! ftp://127.0.0.1:21
    ```
 
-> **Windows File Explorer Tip**: Simply enter `ftp://localhost:21` (or your custom port) in the address bar to browse your SFTP server like a local folder!
+> **Windows File Explorer Tip**: Simply enter `ftp://127.0.0.1:21` (or your custom host/port) in the address bar to browse your SFTP server like a local folder!
 
 2. **Direct Arguments** (Fully automated):
    ```bash
-   npx sftp-to-ftp --ssh-host 192.168.0.105 --ssh-port 22 --ssh-user root --ssh-pass PWD --ftp-port 21
+   npx sftp-to-ftp --ssh-host 192.168.0.105 --ssh-port 22 --ssh-user root --ssh-pass PWD --ftp-host 127.0.0.1 --ftp-port 21
    ```
 
 3. **Anonymous Mode** (No SSH credentials required if pre-authenticated):
    ```bash
-   npx sftp-to-ftp --ssh-host 192.168.0.105 --ssh-port 22 --ftp-port 21
+   npx sftp-to-ftp --ssh-host 192.168.0.105 --ssh-port 22 --ftp-host 127.0.0.1 --ftp-port 21
    ```
 
 ### Programmatic Usage
@@ -68,19 +69,22 @@ import { SSHToFTPBridge } from 'sftp-to-ftp';
 // Create bridge to SSH server
 const bridge = new SSHToFTPBridge(
   {
-    host: 'your-ssh-server.com',
+    host: 'your-ssh-server',
     port: 22,
     username: 'your-user',
     password: 'your-pass'
   },
-  { port: 2121 } // Optional FTP port
+  {
+    host: '127.0.0.1' // Optional FTP host
+    port: 21 // Optional FTP port
+  }
 );
 
-// The FTP server is now running on port 2121
-// Connect with any FTP client to localhost:2121
+// The FTP server is now running on port 21
+// Connect with any FTP client to ftp://127.0.0.1:21
 
 // To shutdown:
-await bridge.terminate();
+// await bridge.terminate();
 ```
 
 ## API Reference
@@ -99,6 +103,7 @@ new SSHToFTPBridge(sshConfig: SSHConfiguration, options?: { port?: number })
   - `username` (string) - SSH username
   - `password` (string) - SSH password
 - `options` (Object, optional):
+  - `host` (string) - FTP server hostname/IP (default: 127.0.0.1)
   - `port` (number) - FTP server port (default: 21)
 
 #### Methods
